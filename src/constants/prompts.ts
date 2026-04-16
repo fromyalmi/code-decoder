@@ -1,0 +1,1 @@
+// SYSTEM_PROMPT 상수, PROMPT_VERSION — OpenAI 프롬프트 관리

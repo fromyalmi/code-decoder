@@ -27,7 +27,7 @@
 - **Framework**: React 18 + TypeScript (strict mode)
 - **Build**: Vite 5
 - **Styling**: Tailwind CSS v3 (커스텀 토큰 포함, 아래 디자인 시스템 참조)
-- **Icons**: `@material-symbols/font` (Material Symbols Outlined) — Lucide 사용 금지
+- **Icons**: `material-symbols` (Material Symbols Outlined) — Lucide 사용 금지
 - **Storage**: `idb-keyval` (IndexedDB 래퍼)
 - **AI**: OpenAI API `gpt-4o-mini`, `response_format: { type: "json_object" }`
 - **Deploy**: Vercel

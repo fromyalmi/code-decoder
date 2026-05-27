@@ -43,3 +43,16 @@ class TestAnalysesPostGate:
         resp = logged_in_client.post(ENDPOINT, json={"code": ""})
         assert resp.status_code == 422
         assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+class TestAnalysesPostServiceBoundary:
+    def test_valid_request_calls_service_create(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 201
+
+    def test_language_defaults_to_python_when_omitted(
+        self, logged_in_client: TestClient
+    ):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 201
+        assert resp.json()["language"] == "python"

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(/c/workAI/code-decoder/backend/.venv/Scripts/python.exe *)",
-      "Bash(.venv/Scripts/python -m pytest tests/auth/test_signup_validation.py -v)"
+      "Bash(.venv/Scripts/python -m pytest tests/auth/test_signup_validation.py -v)",
+      "Bash(.venv/Scripts/python *)"
     ]
   }
 }

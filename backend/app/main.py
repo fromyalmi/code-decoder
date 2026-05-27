@@ -1,6 +1,35 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+from app.routers.auth import router as auth_router
+from app.routers.users import router as users_router
 
 app = FastAPI(title="Code Decoder API")
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": {"code": "InputInvalid", "message": "입력값을 다시 확인해줘요."}
+        },
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    if isinstance(exc.detail, dict):
+        return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": {"code": "Error", "message": str(exc.detail)}},
+    )
+
+
+app.include_router(auth_router, prefix="/api/v1/auth")
+app.include_router(users_router, prefix="/api/v1")
 
 
 @app.get("/healthz")

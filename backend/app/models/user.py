@@ -12,3 +12,5 @@ class User(SQLModel, table=True):
     nickname: str
     login_failed_count: int = Field(default=0)
     login_locked_until: Optional[datetime] = Field(default=None)
+    level: int = Field(default=1)
+    level_auto: bool = Field(default=False)

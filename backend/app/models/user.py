@@ -14,3 +14,5 @@ class User(SQLModel, table=True):
     login_locked_until: Optional[datetime] = Field(default=None)
     level: int = Field(default=1)
     level_auto: bool = Field(default=False)
+    first_login_completed_at: Optional[datetime] = Field(default=None)
+    sound_enabled: bool = Field(default=False)

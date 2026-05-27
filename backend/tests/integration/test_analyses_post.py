@@ -11,7 +11,13 @@ TEST_NICK = "분석러"
 def logged_in_client(client: TestClient) -> TestClient:
     client.post(
         "/api/v1/auth/signup",
-        json={"email": TEST_EMAIL, "password": TEST_PW, "nickname": TEST_NICK},
+        json={
+            "email": TEST_EMAIL,
+            "password": TEST_PW,
+            "nickname": TEST_NICK,
+            "agreed_terms": True,
+            "agreed_privacy": True,
+        },
     )
     client.post(
         "/api/v1/auth/login",

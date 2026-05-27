@@ -46,10 +46,10 @@ def test_patch_level_4_sets_auto_true(logged_in_client):
 
 
 def test_patch_level_invalid_out_of_range(logged_in_client):
-    """범위 초과 level → 400 InputInvalid"""
+    """범위 초과 level → 422 VALIDATION_ERROR"""
     resp = logged_in_client.patch(PATCH_ME_URL, json={"level": 5})
-    assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "InputInvalid"
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
 def test_patch_level_requires_auth(client):

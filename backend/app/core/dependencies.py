@@ -8,6 +8,10 @@ from app.db import get_session
 from app.models.user import User
 
 
+def rate_limit_dep() -> None:
+    """Stub — Pre-MVP in-memory rate limit placeholder (Closed Beta: Redis)."""
+
+
 async def get_current_user(
     session: str | None = Cookie(default=None, alias=COOKIE_NAME),
     db: Session = Depends(get_session),

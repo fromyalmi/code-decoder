@@ -14,14 +14,14 @@ VALID_BASE = {
 
 def test_signup_rejects_invalid_email_format(client):
     resp = client.post(SIGNUP_URL, json={**VALID_BASE, "email": "not-an-email"})
-    assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "InputInvalid"
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
 def test_signup_rejects_password_under_8_chars(client):
     resp = client.post(SIGNUP_URL, json={**VALID_BASE, "password": "1234567"})
-    assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "InputInvalid"
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
 @pytest.mark.parametrize(
@@ -33,8 +33,8 @@ def test_signup_rejects_password_under_8_chars(client):
 )
 def test_signup_rejects_nickname_out_of_range(client, nickname):
     resp = client.post(SIGNUP_URL, json={**VALID_BASE, "nickname": nickname})
-    assert resp.status_code == 400
-    assert resp.json()["error"]["code"] == "InputInvalid"
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
 def test_signup_rejects_duplicate_email(client):

@@ -17,6 +17,7 @@ from app.models import reward as _reward_models  # noqa: F401
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router
+from app.routers.encyclopedia import router as encyclopedia_router
 from app.routers.search import router as search_router
 from app.routers.users import router as users_router
 
@@ -102,6 +103,7 @@ app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(analyses_router, prefix="/api/v1")
 app.include_router(search_router, prefix="/api/v1")
+app.include_router(encyclopedia_router, prefix="/api/v1")
 
 
 @app.get("/healthz")

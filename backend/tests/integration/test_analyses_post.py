@@ -283,6 +283,34 @@ class TestAnalysesPostTransaction:
         assert rows[0].reason == "analysis"
 
 
+class TestAnalysesPostLineExplanations:
+    def test_line_explanations_persisted(self, llm_client_db):
+        from app.models.line_explanation import LineExplanation
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(LineExplanation)).all()
+        assert len(rows) == 3
+
+    def test_analysis_cache_row_created(self, llm_client_db):
+        from app.models.cache import AnalysisCache
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            row = s.exec(select(AnalysisCache)).first()
+        assert row is not None
+        assert row.expires_at > datetime.utcnow()
+
+    def test_response_has_line_explanations_list(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        lines = resp.json().get("line_explanations")
+        assert isinstance(lines, list)
+        assert len(lines) == 3
+        assert "line_no" in lines[0] and "short" in lines[0]
+
+
 class TestAnalysesPostLLMBoundary:
     def test_response_has_forest_from_llm(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})

@@ -5,6 +5,7 @@ from sqlmodel import Session
 from app.core.exceptions import AnalysisNotFound, DailyLimitExceeded
 from app.llm import client as _llm
 from app.models.daily_limit_log import DailyLimitLog
+from app.models.line_explanation import LineExplanation
 from app.models.user import User
 from app.repositories import analysis_repo, user_repo
 
@@ -40,3 +41,22 @@ def expand(analysis_id: uuid.UUID, line_no: int, user: User, db: Session) -> dic
         "leaf_counter": user.leaf_counter,
         "daily_used": user.daily_used,
     }
+
+
+def pin(
+    analysis_id: uuid.UUID, line_no: int, deep_text: str, user: User, db: Session
+) -> None:
+    analysis = analysis_repo.get_by_id_for_user(analysis_id, user.id, db)
+    if analysis is None:
+        raise AnalysisNotFound
+
+    db.add(
+        LineExplanation(
+            analysis_id=analysis.id,
+            line_no=line_no,
+            tier="deep_pinned",
+            deep=deep_text,
+            is_pinned=True,
+        )
+    )
+    db.commit()

@@ -10,3 +10,7 @@ class AnalysisCreateRequest(BaseModel):
 
 class LeafExpandRequest(BaseModel):
     line_no: int
+
+
+class LeafPinRequest(BaseModel):
+    deep_text: str

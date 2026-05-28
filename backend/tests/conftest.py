@@ -23,6 +23,10 @@ _LLM_STUB = {
 @pytest.fixture(autouse=True)
 def _default_llm_mock(monkeypatch):
     monkeypatch.setattr("app.llm.client.call_analysis", lambda msgs, **kw: _LLM_STUB)
+    monkeypatch.setattr(
+        "app.llm.client.call_leaf_expand",
+        lambda line_no, level: {"deep_text": f"[stub] line {line_no} 깊은 해설"},
+    )
 
 
 _SIGNUP_URL = "/api/v1/auth/signup"

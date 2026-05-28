@@ -56,3 +56,16 @@ class TestAnalysesPostServiceBoundary:
         resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
         assert resp.status_code == 201
         assert resp.json()["language"] == "python"
+
+
+class TestAnalysesPostRawSizeValidation:
+    def test_returns_400_when_code_exceeds_4000_tokens(
+        self, logged_in_client: TestClient
+    ):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "x = 1\n" * 3000})
+        assert resp.status_code == 400
+        assert resp.json()["error"]["code"] == "INPUT_TOO_LARGE"
+
+    def test_passes_when_code_is_within_limit(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 201

@@ -1,0 +1,2 @@
+class DailyLimitExceeded(Exception):
+    pass

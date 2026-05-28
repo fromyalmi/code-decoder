@@ -2,12 +2,26 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.core.exceptions import DailyLimitExceeded
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 
 app = FastAPI(title="Code Decoder API")
+
+
+@app.exception_handler(DailyLimitExceeded)
+async def daily_limit_exceeded_handler(request, exc):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "error": {
+                "code": "DAILY_LIMIT_EXCEEDED",
+                "message": "🦜 오늘 한도 다 썼어 — 자정에 다시 풀려!",
+            }
+        },
+    )
 
 
 @app.exception_handler(InputTooLarge)

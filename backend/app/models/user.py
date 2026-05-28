@@ -16,3 +16,5 @@ class User(SQLModel, table=True):
     level_auto: bool = Field(default=False)
     first_login_completed_at: Optional[datetime] = Field(default=None)
     sound_enabled: bool = Field(default=False)
+    daily_used: int = Field(default=0)
+    daily_limit: int = Field(default=10)

@@ -32,4 +32,19 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
     if user.daily_used >= user.daily_limit:
         raise DailyLimitExceeded
     language = req.language or "python"
-    return {"language": language, "cache_hit": False}
+
+    from app.llm import client as _llm
+    from app.llm.parser import parse_analysis_response
+    from app.llm.prompt import build_prompt
+
+    messages = build_prompt(cleaned.tagged, user.level)
+    raw = _llm.call_analysis(messages)
+    parsed = parse_analysis_response(raw)
+
+    db.commit()
+    return {
+        "language": language,
+        "forest": parsed.forest,
+        "tree": parsed.tree,
+        "cache_hit": False,
+    }

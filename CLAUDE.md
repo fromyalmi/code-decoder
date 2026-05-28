@@ -23,7 +23,7 @@
 ## 절대 금지 (TDDoc §38.4 8개 함정)
 - routers에서 `HTTPException` 직접 던지기 → DomainError 사용 (§32·§36.2)
 - services에서 `Request`/`Response` 받기 → HTTP 무지 원칙 (§31)
-- LLM 호출을 트랜잭션 안으로 옮기기 (§33 ⑦)
+- §33.7 프롬프트 BLOCK A/B 조립 원칙 무시하기 (§33.7) ← §33.4 (a): LLM 호출은 트랜잭션 안이 정상
 - 프론트 컴포넌트에서 `fetch` 직접 호출 → `useApi` 단일 진입 (§35 F-1)
 - Alembic `downgrade` 작성 → forward-only (§37.4)
 - `.env`에 시크릿 커밋 → `.env.local`만, `.gitignore` 확인
@@ -45,3 +45,13 @@
 - 제품 오너(코뉴): AI 교육 4-5개월 차 — 타겟에 가까운 dogfooder 위치
 - 픽셀 미학(NFR-8): radius 0 강제, `steps()` 강제, 4px 그리드
 - D-3 체크포인트(5/29) = K-Digital 발표일, P0 27개 미달 시 자동 강등 룰 발동
+
+## [TODO] Alembic 초기화 — Railway 배포 전 필수
+
+현재: 미초기화 상태, 테스트는 SQLite create_all로 동작 중
+작업:
+  alembic init alembic
+  alembic revision --autogenerate -m "initial schema"
+  alembic upgrade head
+
+시점: LLM 연동 완료 후 Railway 첫 배포 직전

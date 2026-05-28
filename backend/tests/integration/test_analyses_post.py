@@ -222,3 +222,17 @@ class TestAnalysesPostCache:
         resp = logged_in_client.post(ENDPOINT, json={"code": "print('cache miss')"})
         assert resp.status_code == 201
         assert resp.json().get("cache_hit") is False
+
+
+LLM_CODE = "x = 1\ny = 2\nprint(x + y)"
+
+
+class TestAnalysesPostLLMBoundary:
+    def test_response_has_forest_from_llm(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        assert resp.status_code == 201
+        assert "forest" in resp.json()
+
+    def test_response_has_tree_from_llm(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        assert "tree" in resp.json()

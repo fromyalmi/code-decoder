@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import DailyLimitExceeded
+from app.core.exceptions import DailyLimitExceeded, LLMFailure
 from app.models import cache as _cache_models  # noqa: F401 — registers AnalysisCache in metadata
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
@@ -10,6 +10,19 @@ from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 
 app = FastAPI(title="Code Decoder API")
+
+
+@app.exception_handler(LLMFailure)
+async def llm_failure_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "code": "LLM_FAILURE",
+                "message": "🦜 미안, 지금 좀 문제가 생겼어",
+            }
+        },
+    )
 
 
 @app.exception_handler(DailyLimitExceeded)

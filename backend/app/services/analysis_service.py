@@ -274,3 +274,16 @@ def update_for_user(
     db.commit()
     db.refresh(analysis)
     return get_for_user(analysis_id, user, db)
+
+
+def delete_for_user(analysis_id: uuid.UUID, user: User, db: Session) -> None:
+    analysis = db.exec(
+        select(Analysis).where(Analysis.id == analysis_id, Analysis.user_id == user.id)
+    ).first()
+    if analysis is None:
+        from app.core.exceptions import AnalysisNotFound
+
+        raise AnalysisNotFound
+
+    db.delete(analysis)
+    db.commit()

@@ -73,6 +73,15 @@ def patch_analysis(
     )
 
 
+@router.delete("/analyses/{analysis_id}", status_code=204)
+def delete_analysis(
+    analysis_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_session),
+):
+    analysis_service.delete_for_user(analysis_id, current_user, db)
+
+
 @router.patch("/analyses/{analysis_id}/leaves/{line_no}/pin", status_code=204)
 def pin_leaf(
     analysis_id: uuid.UUID,

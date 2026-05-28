@@ -1,9 +1,13 @@
+import base64
 import hashlib
+import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
-from sqlmodel import Session, select
+from sqlmodel import Session, and_, or_, select
 
 from app.core.exceptions import DailyLimitExceeded
+from app.models.analysis import Analysis
 from app.models.cache import AnalysisCache
 from app.models.user import User
 from app.preprocessing.code_cleaner import clean
@@ -147,3 +151,51 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
     )
     db.commit()
     return response
+
+
+def list_for_user(
+    user: User, db: Session, cursor: Optional[str] = None, limit: int = 20
+) -> dict:
+    stmt = select(Analysis).where(Analysis.user_id == user.id)
+
+    if cursor:
+        try:
+            decoded = base64.b64decode(cursor).decode()
+            cursor_ts_str, cursor_id_str = decoded.split("|", 1)
+            cursor_ts = datetime.fromisoformat(cursor_ts_str)
+            stmt = stmt.where(
+                or_(
+                    Analysis.created_at < cursor_ts,
+                    and_(
+                        Analysis.created_at == cursor_ts,
+                        Analysis.id < uuid.UUID(cursor_id_str),
+                    ),
+                )
+            )
+        except Exception:
+            pass
+
+    stmt = stmt.order_by(Analysis.created_at.desc(), Analysis.id.desc()).limit(
+        limit + 1
+    )
+    rows = db.exec(stmt).all()
+
+    next_cursor = None
+    if len(rows) == limit + 1:
+        rows = rows[:limit]
+        last = rows[-1]  # last item of current page → cursor for next page
+        token = f"{last.created_at.isoformat()}|{last.id}"
+        next_cursor = base64.b64encode(token.encode()).decode()
+
+    items = [
+        {
+            "id": str(r.id),
+            "created_at": r.created_at.isoformat() + "Z",
+            "language": r.language,
+            "code_preview": r.code_original[:40],
+            "tags": r.tags,
+            "is_favorite": r.is_favorite,
+        }
+        for r in rows
+    ]
+    return {"items": items, "next_cursor": next_cursor}

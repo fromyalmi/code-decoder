@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,3 +14,9 @@ class LeafExpandRequest(BaseModel):
 
 class LeafPinRequest(BaseModel):
     deep_text: str
+
+
+class AnalysisPatchRequest(BaseModel):
+    tags: Optional[List[str]] = None
+    memo: Optional[str] = None
+    is_favorite: Optional[bool] = None

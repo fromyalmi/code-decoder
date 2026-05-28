@@ -1,10 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.db import get_session
 from app.main import app as _app
+from app.models.user import User
 
 LIST_URL = "/api/v1/analyses"
 TEST_EMAIL = "list@test.com"
@@ -37,6 +38,11 @@ def list_client_db():
             },
         )
         c.post("/api/v1/auth/login", json={"email": TEST_EMAIL, "password": TEST_PW})
+        with Session(engine) as s:
+            u = s.exec(select(User).where(User.email == TEST_EMAIL)).one()
+            u.daily_limit = 100
+            s.add(u)
+            s.commit()
         yield c, engine
     _app.dependency_overrides.clear()
 

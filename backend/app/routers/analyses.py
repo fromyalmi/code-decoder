@@ -1,6 +1,7 @@
 import uuid
+from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from app.core.dependencies import get_current_user, rate_limit_dep
@@ -34,6 +35,15 @@ def expand_leaf(
     db: Session = Depends(get_session),
 ):
     return leaf_service.expand(analysis_id, body.line_no, current_user, db)
+
+
+@router.get("/analyses")
+def list_analyses(
+    cursor: Optional[str] = Query(default=None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_session),
+):
+    return analysis_service.list_for_user(current_user, db, cursor=cursor)
 
 
 @router.patch("/analyses/{analysis_id}/leaves/{line_no}/pin", status_code=204)

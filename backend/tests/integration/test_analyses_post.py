@@ -338,6 +338,69 @@ class TestAnalysesPost201Schema:
         assert concepts[0]["is_new"] is True
 
 
+LLM_FAIL_EMAIL = "llmfail@test.com"
+
+
+@pytest.fixture
+def llm_failure_client_db(monkeypatch):
+    from app.core.exceptions import LLMFailure
+
+    monkeypatch.setattr(
+        "app.llm.client.call_analysis",
+        lambda *a, **kw: (_ for _ in ()).throw(LLMFailure("down")),
+    )
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    SQLModel.metadata.create_all(engine)
+
+    def _override():
+        with Session(engine) as s:
+            yield s
+
+    _app.dependency_overrides[get_session] = _override
+    with TestClient(_app, base_url="https://testserver") as c:
+        c.post(
+            "/api/v1/auth/signup",
+            json={
+                "email": LLM_FAIL_EMAIL,
+                "password": TEST_PW,
+                "nickname": "실패유저",
+                "agreed_terms": True,
+                "agreed_privacy": True,
+            },
+        )
+        c.post(
+            "/api/v1/auth/login", json={"email": LLM_FAIL_EMAIL, "password": TEST_PW}
+        )
+        yield c, engine
+    _app.dependency_overrides.clear()
+
+
+class TestAnalysesPostLLMFailure:
+    def test_returns_500_with_llm_failure_code(self, llm_failure_client_db):
+        client, _ = llm_failure_client_db
+        resp = client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 500
+        assert resp.json()["error"]["code"] == "LLM_FAILURE"
+
+    def test_daily_used_not_incremented_on_llm_failure(self, llm_failure_client_db):
+        client, engine = llm_failure_client_db
+        client.post(ENDPOINT, json={"code": "print('hi')"})
+        with Session(engine) as s:
+            u = s.exec(select(User).where(User.email == LLM_FAIL_EMAIL)).one()
+        assert u.daily_used == 0
+
+    def test_analysis_row_not_created_on_llm_failure(self, llm_failure_client_db):
+        from app.models.analysis import Analysis
+
+        client, engine = llm_failure_client_db
+        client.post(ENDPOINT, json={"code": "print('hi')"})
+        with Session(engine) as s:
+            count = len(s.exec(select(Analysis)).all())
+        assert count == 0
+
+
 class TestAnalysesPostLLMBoundary:
     def test_response_has_forest_from_llm(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})

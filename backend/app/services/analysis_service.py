@@ -133,6 +133,8 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
         "caterpillar_earned": 1,
         "daily_used": user.daily_used,
         "leaf_counter": user.leaf_counter,
+        "is_favorite": analysis.is_favorite,
+        "memo": analysis.memo,
         "cache_hit": False,
     }
     db.add(

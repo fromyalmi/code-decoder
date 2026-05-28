@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import Column, JSON
 from sqlmodel import Field, SQLModel
 
@@ -18,4 +19,6 @@ class Analysis(SQLModel, table=True):
     forest: str
     tree: str
     tags: list = Field(sa_column=Column(JSON, nullable=False), default_factory=list)
+    is_favorite: bool = Field(default=False)
+    memo: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import DailyLimitExceeded, LLMFailure
+from app.core.exceptions import AnalysisNotFound, DailyLimitExceeded, LLMFailure
 from app.models import analysis as _analysis_models  # noqa: F401
 from app.models import cache as _cache_models  # noqa: F401 — registers AnalysisCache in metadata
 from app.models import daily_limit_log as _log_models  # noqa: F401
@@ -39,6 +39,14 @@ async def daily_limit_exceeded_handler(request, exc):
                 "message": "🦜 오늘 한도 다 썼어 — 자정에 다시 풀려!",
             }
         },
+    )
+
+
+@app.exception_handler(AnalysisNotFound)
+async def analysis_not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"error": {"code": "NOT_FOUND", "message": "🦜 분석을 찾을 수 없어"}},
     )
 
 

@@ -4,3 +4,7 @@ class DailyLimitExceeded(Exception):
 
 class LLMFailure(Exception):
     pass
+
+
+class AnalysisNotFound(Exception):
+    pass

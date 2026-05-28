@@ -1,4 +1,6 @@
+import hashlib
 import pytest
+from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
@@ -6,6 +8,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from app.db import get_session
 from app.main import app as _app
 from app.models.user import User
+from app.preprocessing.code_cleaner import clean
 
 ENDPOINT = "/api/v1/analyses"
 TEST_EMAIL = "analyst@test.com"
@@ -145,3 +148,77 @@ class TestAnalysesPostProcessedSizeValidation:
     ):
         resp = logged_in_client.post(ENDPOINT, json={"code": "x = 1\n" * 10})
         assert resp.status_code == 201
+
+
+CACHED_CODE = "print('hi')"
+CACHED_EMAIL = "cached@test.com"
+
+
+@pytest.fixture
+def cached_client() -> TestClient:
+    # ImportError in RED — AnalysisCache model not yet defined
+    from app.models.cache import AnalysisCache
+
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+
+    def _override():
+        with Session(engine) as s:
+            yield s
+
+    _app.dependency_overrides[get_session] = _override
+
+    with TestClient(_app, base_url="https://testserver") as c:
+        c.post(
+            "/api/v1/auth/signup",
+            json={
+                "email": CACHED_EMAIL,
+                "password": TEST_PW,
+                "nickname": "캐시유저",
+                "agreed_terms": True,
+                "agreed_privacy": True,
+            },
+        )
+        c.post("/api/v1/auth/login", json={"email": CACHED_EMAIL, "password": TEST_PW})
+
+        with Session(engine) as db:
+            user = db.exec(select(User).where(User.email == CACHED_EMAIL)).one()
+            # daily_limit=1 so a cache miss after a cache hit proves no increment
+            user.daily_limit = 1
+            code_sha256 = hashlib.sha256(clean(CACHED_CODE).code.encode()).hexdigest()
+            db.add(
+                AnalysisCache(
+                    user_id=user.id,
+                    code_sha256=code_sha256,
+                    result={"language": "python", "cache_hit": True},
+                    expires_at=datetime.utcnow() + timedelta(days=7),
+                )
+            )
+            db.commit()
+
+        yield c
+
+    _app.dependency_overrides.clear()
+
+
+class TestAnalysesPostCache:
+    def test_cache_hit_returns_cache_hit_true(self, cached_client: TestClient):
+        resp = cached_client.post(ENDPOINT, json={"code": CACHED_CODE})
+        assert resp.status_code == 201
+        assert resp.json()["cache_hit"] is True
+
+    def test_cache_hit_does_not_increment_daily_used(self, cached_client: TestClient):
+        # user has daily_limit=1; cache hit must not consume it
+        cached_client.post(ENDPOINT, json={"code": CACHED_CODE})
+        # a cache miss would return 429 if daily_used was incremented
+        resp_miss = cached_client.post(ENDPOINT, json={"code": "print('miss')"})
+        assert resp_miss.status_code == 201
+
+    def test_cache_miss_proceeds_normally(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "print('cache miss')"})
+        assert resp.status_code == 201
+        assert resp.json().get("cache_hit") is False

@@ -46,6 +46,15 @@ def list_analyses(
     return analysis_service.list_for_user(current_user, db, cursor=cursor)
 
 
+@router.get("/analyses/{analysis_id}")
+def get_analysis(
+    analysis_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_session),
+):
+    return analysis_service.get_for_user(analysis_id, current_user, db)
+
+
 @router.patch("/analyses/{analysis_id}/leaves/{line_no}/pin", status_code=204)
 def pin_leaf(
     analysis_id: uuid.UUID,

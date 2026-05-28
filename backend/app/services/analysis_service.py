@@ -199,3 +199,49 @@ def list_for_user(
         for r in rows
     ]
     return {"items": items, "next_cursor": next_cursor}
+
+
+def get_for_user(analysis_id: uuid.UUID, user: User, db: Session) -> dict:
+    from app.models.key_concept import KeyConcept
+    from app.models.line_explanation import LineExplanation
+
+    analysis = db.exec(
+        select(Analysis).where(Analysis.id == analysis_id, Analysis.user_id == user.id)
+    ).first()
+    if analysis is None:
+        from app.core.exceptions import AnalysisNotFound
+
+        raise AnalysisNotFound
+
+    les = db.exec(
+        select(LineExplanation).where(
+            LineExplanation.analysis_id == analysis.id,
+            LineExplanation.tier == "short",
+        )
+    ).all()
+
+    deep = db.exec(
+        select(LineExplanation).where(
+            LineExplanation.analysis_id == analysis.id,
+            LineExplanation.tier.in_(["deep_core", "deep_pinned"]),
+        )
+    ).all()
+
+    kcs = db.exec(select(KeyConcept).where(KeyConcept.analysis_id == analysis.id)).all()
+
+    return {
+        "id": str(analysis.id),
+        "user_id": str(analysis.user_id),
+        "created_at": analysis.created_at.isoformat() + "Z",
+        "language": analysis.language,
+        "code_original": analysis.code_original,
+        "code_processed": analysis.code_processed,
+        "forest": analysis.forest,
+        "tree": analysis.tree,
+        "tags": analysis.tags,
+        "memo": analysis.memo,
+        "is_favorite": analysis.is_favorite,
+        "line_explanations": [{"line_no": le.line_no, "short": le.short} for le in les],
+        "deep_leaves": [{"line_no": dl.line_no, "deep": dl.deep} for dl in deep],
+        "key_concepts": [{"name": kc.name, "definition": kc.definition} for kc in kcs],
+    }

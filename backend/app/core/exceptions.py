@@ -8,3 +8,7 @@ class LLMFailure(Exception):
 
 class AnalysisNotFound(Exception):
     pass
+
+
+class EmptyQuery(Exception):
+    pass

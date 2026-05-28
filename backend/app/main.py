@@ -2,7 +2,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import AnalysisNotFound, DailyLimitExceeded, LLMFailure
+from app.core.exceptions import (
+    AnalysisNotFound,
+    DailyLimitExceeded,
+    EmptyQuery,
+    LLMFailure,
+)
 from app.models import analysis as _analysis_models  # noqa: F401
 from app.models import cache as _cache_models  # noqa: F401 — registers AnalysisCache in metadata
 from app.models import daily_limit_log as _log_models  # noqa: F401
@@ -12,6 +17,7 @@ from app.models import reward as _reward_models  # noqa: F401
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router
+from app.routers.search import router as search_router
 from app.routers.users import router as users_router
 
 app = FastAPI(title="Code Decoder API")
@@ -74,6 +80,14 @@ async def validation_exception_handler(request, exc):
     )
 
 
+@app.exception_handler(EmptyQuery)
+async def empty_query_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"error": {"code": "EMPTY_QUERY", "message": "🦜 검색어를 입력해줘"}},
+    )
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     if isinstance(exc.detail, dict):
@@ -87,6 +101,7 @@ async def http_exception_handler(request, exc):
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(analyses_router, prefix="/api/v1")
+app.include_router(search_router, prefix="/api/v1")
 
 
 @app.get("/healthz")

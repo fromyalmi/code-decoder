@@ -227,6 +227,62 @@ class TestAnalysesPostCache:
 LLM_CODE = "x = 1\ny = 2\nprint(x + y)"
 
 
+@pytest.fixture
+def llm_client_db():
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    SQLModel.metadata.create_all(engine)
+
+    def _override():
+        with Session(engine) as s:
+            yield s
+
+    _app.dependency_overrides[get_session] = _override
+    with TestClient(_app, base_url="https://testserver") as c:
+        c.post(
+            "/api/v1/auth/signup",
+            json={
+                "email": TEST_EMAIL,
+                "password": TEST_PW,
+                "nickname": TEST_NICK,
+                "agreed_terms": True,
+                "agreed_privacy": True,
+            },
+        )
+        c.post("/api/v1/auth/login", json={"email": TEST_EMAIL, "password": TEST_PW})
+        yield c, engine
+    _app.dependency_overrides.clear()
+
+
+class TestAnalysesPostTransaction:
+    def test_analysis_row_persisted(self, llm_client_db):
+        from app.models.analysis import Analysis
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(Analysis)).all()
+        assert len(rows) == 1
+
+    def test_daily_used_incremented_atomically(self, llm_client_db):
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            u = s.exec(select(User).where(User.email == TEST_EMAIL)).one()
+        assert u.daily_used == 1
+
+    def test_daily_limit_log_persisted(self, llm_client_db):
+        from app.models.daily_limit_log import DailyLimitLog
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(DailyLimitLog)).all()
+        assert len(rows) == 1
+        assert rows[0].reason == "analysis"
+
+
 class TestAnalysesPostLLMBoundary:
     def test_response_has_forest_from_llm(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})

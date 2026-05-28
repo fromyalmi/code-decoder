@@ -8,6 +8,7 @@ from app.models import cache as _cache_models  # noqa: F401 — registers Analys
 from app.models import daily_limit_log as _log_models  # noqa: F401
 from app.models import key_concept as _kc_models  # noqa: F401
 from app.models import line_explanation as _le_models  # noqa: F401
+from app.models import reward as _reward_models  # noqa: F401
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router

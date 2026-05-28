@@ -46,7 +46,7 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
     from app.models.daily_limit_log import DailyLimitLog
     from app.models.key_concept import KeyConcept
     from app.models.line_explanation import LineExplanation
-    from app.repositories import user_repo
+    from app.repositories import reward_repo, user_repo
 
     messages = build_prompt(cleaned.tagged, user.level)
     raw = _llm.call_analysis(messages)
@@ -106,6 +106,8 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
             )
         )
 
+    reward_repo.grant_on_analysis(user.id, db)
+
     db.commit()
     db.refresh(user)
 
@@ -134,7 +136,6 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
             for kc in parsed.key_concepts
         ],
         "created_at": analysis.created_at.isoformat() + "Z",
-        "caterpillar_earned": 1,
         "daily_used": user.daily_used,
         "leaf_counter": user.leaf_counter,
         "is_favorite": analysis.is_favorite,

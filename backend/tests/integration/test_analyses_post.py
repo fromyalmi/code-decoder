@@ -291,7 +291,30 @@ class TestAnalysesPostLineExplanations:
         client.post(ENDPOINT, json={"code": LLM_CODE})
         with Session(engine) as s:
             rows = s.exec(select(LineExplanation)).all()
-        assert len(rows) == 3
+        assert len([r for r in rows if r.tier == "short"]) == 3
+
+    def test_deep_core_leaves_persisted(self, llm_client_db):
+        from app.models.line_explanation import LineExplanation
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(LineExplanation)).all()
+        deep_core = [r for r in rows if r.tier == "deep_core"]
+        assert len(deep_core) == 5  # stub deep_leaves: line 1~5
+
+    def test_deep_core_text_saved(self, llm_client_db):
+        from app.models.line_explanation import LineExplanation
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(LineExplanation)).all()
+        deep_core = sorted(
+            [r for r in rows if r.tier == "deep_core"], key=lambda r: r.line_no
+        )
+        assert deep_core[0].line_no == 1
+        assert deep_core[0].deep == "깊은 설명 1"
 
     def test_analysis_cache_row_created(self, llm_client_db):
         from app.models.cache import AnalysisCache

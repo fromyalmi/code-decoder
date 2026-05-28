@@ -2,11 +2,25 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 
 app = FastAPI(title="Code Decoder API")
+
+
+@app.exception_handler(InputTooLarge)
+async def input_too_large_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": {
+                "code": "INPUT_TOO_LARGE",
+                "message": "🦜 코드가 너무 길어 — 4,000토큰 이하로 부탁해",
+            }
+        },
+    )
 
 
 @app.exception_handler(RequestValidationError)

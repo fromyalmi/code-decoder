@@ -360,6 +360,15 @@ class TestAnalysesPost201Schema:
         assert len(concepts) == 1
         assert concepts[0]["is_new"] is True
 
+    def test_response_has_is_favorite_false(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        assert resp.json().get("is_favorite") is False
+
+    def test_response_has_memo_null(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        assert "memo" in resp.json()
+        assert resp.json()["memo"] is None
+
 
 LLM_FAIL_EMAIL = "llmfail@test.com"
 

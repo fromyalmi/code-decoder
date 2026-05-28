@@ -9,6 +9,7 @@ from app.db import get_session
 from app.models.user import User
 from app.schemas.analysis import (
     AnalysisCreateRequest,
+    AnalysisPatchRequest,
     LeafExpandRequest,
     LeafPinRequest,
 )
@@ -53,6 +54,23 @@ def get_analysis(
     db: Session = Depends(get_session),
 ):
     return analysis_service.get_for_user(analysis_id, current_user, db)
+
+
+@router.patch("/analyses/{analysis_id}")
+def patch_analysis(
+    analysis_id: uuid.UUID,
+    body: AnalysisPatchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_session),
+):
+    return analysis_service.update_for_user(
+        analysis_id,
+        current_user,
+        db,
+        tags=body.tags,
+        memo=body.memo,
+        is_favorite=body.is_favorite,
+    )
 
 
 @router.patch("/analyses/{analysis_id}/leaves/{line_no}/pin", status_code=204)

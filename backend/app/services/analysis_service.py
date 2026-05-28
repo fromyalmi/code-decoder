@@ -245,3 +245,32 @@ def get_for_user(analysis_id: uuid.UUID, user: User, db: Session) -> dict:
         "deep_leaves": [{"line_no": dl.line_no, "deep": dl.deep} for dl in deep],
         "key_concepts": [{"name": kc.name, "definition": kc.definition} for kc in kcs],
     }
+
+
+def update_for_user(
+    analysis_id: uuid.UUID,
+    user: User,
+    db: Session,
+    tags: Optional[list] = None,
+    memo: Optional[str] = None,
+    is_favorite: Optional[bool] = None,
+) -> dict:
+    analysis = db.exec(
+        select(Analysis).where(Analysis.id == analysis_id, Analysis.user_id == user.id)
+    ).first()
+    if analysis is None:
+        from app.core.exceptions import AnalysisNotFound
+
+        raise AnalysisNotFound
+
+    if tags is not None:
+        analysis.tags = tags
+    if memo is not None:
+        analysis.memo = memo
+    if is_favorite is not None:
+        analysis.is_favorite = is_favorite
+
+    db.add(analysis)
+    db.commit()
+    db.refresh(analysis)
+    return get_for_user(analysis_id, user, db)

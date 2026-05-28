@@ -130,3 +130,18 @@ class TestAnalysesPostDailyLimit:
     def test_passes_when_daily_limit_not_exhausted(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
         assert resp.status_code == 201
+
+
+class TestAnalysesPostProcessedSizeValidation:
+    def test_returns_400_when_processed_lines_exceed_200(
+        self, logged_in_client: TestClient
+    ):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "x = 1\n" * 201})
+        assert resp.status_code == 400
+        assert resp.json()["error"]["code"] == "INPUT_TOO_LARGE"
+
+    def test_passes_when_processed_lines_within_limit(
+        self, logged_in_client: TestClient
+    ):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "x = 1\n" * 10})
+        assert resp.status_code == 201

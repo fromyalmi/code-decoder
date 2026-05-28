@@ -6,6 +6,7 @@ from app.core.exceptions import DailyLimitExceeded, LLMFailure
 from app.models import analysis as _analysis_models  # noqa: F401
 from app.models import cache as _cache_models  # noqa: F401 — registers AnalysisCache in metadata
 from app.models import daily_limit_log as _log_models  # noqa: F401
+from app.models import line_explanation as _le_models  # noqa: F401
 from app.preprocessing.validator import InputTooLarge
 from app.routers.analyses import router as analyses_router
 from app.routers.auth import router as auth_router

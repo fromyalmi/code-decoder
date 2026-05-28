@@ -25,6 +25,10 @@ def _user_response(user: User) -> dict:
             else None
         ),
         "sound_enabled": user.sound_enabled,
+        "daily_used": user.daily_used,
+        "daily_limit": user.daily_limit,
+        "daily_remaining": user.daily_limit - user.daily_used,
+        "leaf_counter": user.leaf_counter,
     }
 
 

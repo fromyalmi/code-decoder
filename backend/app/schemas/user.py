@@ -18,3 +18,7 @@ class UserResponse(BaseModel):
     level_auto: bool
     first_login_completed_at: Optional[datetime]
     sound_enabled: bool
+    daily_used: int
+    daily_limit: int
+    daily_remaining: int
+    leaf_counter: int

@@ -18,3 +18,4 @@ class User(SQLModel, table=True):
     sound_enabled: bool = Field(default=False)
     daily_used: int = Field(default=0)
     daily_limit: int = Field(default=10)
+    leaf_counter: int = Field(default=0)

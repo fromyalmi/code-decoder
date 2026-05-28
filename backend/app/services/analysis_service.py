@@ -40,6 +40,7 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
     from app.llm.prompt import build_prompt
     from app.models.analysis import Analysis
     from app.models.daily_limit_log import DailyLimitLog
+    from app.models.key_concept import KeyConcept
     from app.models.line_explanation import LineExplanation
     from app.repositories import user_repo
 
@@ -81,14 +82,47 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
         )
     )
 
+    for kc in parsed.key_concepts:
+        db.add(
+            KeyConcept(
+                user_id=user.id,
+                analysis_id=analysis.id,
+                name=kc.name,
+                definition=kc.definition,
+            )
+        )
+
+    db.commit()
+    db.refresh(user)
+
     response = {
+        "id": str(analysis.id),
+        "user_id": str(user.id),
+        "code_original": req.code,
+        "code_processed": cleaned.code,
+        "code_sha256": cache_key,
         "language": language,
+        "line_count_original": analysis.line_count_original,
+        "line_count_processed": analysis.line_count_processed,
+        "line_mapping": analysis.line_mapping,
         "forest": parsed.forest,
         "tree": parsed.tree,
         "line_explanations": [
             {"line_no": le.line_no, "short": le.short}
             for le in parsed.line_explanations
         ],
+        "deep_leaves": [
+            {"line_no": dl.line_no, "deep": dl.deep} for dl in parsed.deep_leaves
+        ],
+        "tags": parsed.tags,
+        "key_concepts": [
+            {"name": kc.name, "definition": kc.definition, "is_new": True}
+            for kc in parsed.key_concepts
+        ],
+        "created_at": analysis.created_at.isoformat() + "Z",
+        "caterpillar_earned": 1,
+        "daily_used": user.daily_used,
+        "leaf_counter": user.leaf_counter,
         "cache_hit": False,
     }
     db.add(

@@ -10,5 +10,8 @@ class LineExplanation(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     analysis_id: uuid.UUID = Field(foreign_key="analysis.id")
     line_no: int
-    short: str
+    short: Optional[str] = Field(default=None)
+    tier: str = Field(default="short")  # 'short' | 'deep_core' | 'deep_pinned'
+    deep: Optional[str] = Field(default=None)
+    is_pinned: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow)

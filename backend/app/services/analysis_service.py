@@ -69,6 +69,16 @@ def create(req: AnalysisCreateRequest, user: User, db: Session) -> dict:
             LineExplanation(analysis_id=analysis.id, line_no=le.line_no, short=le.short)
         )
 
+    for dl in parsed.deep_leaves:
+        db.add(
+            LineExplanation(
+                analysis_id=analysis.id,
+                line_no=dl.line_no,
+                tier="deep_core",
+                deep=dl.deep,
+            )
+        )
+
     consumed = user_repo.try_consume_daily_quota(user.id, db)
     if not consumed:
         raise DailyLimitExceeded

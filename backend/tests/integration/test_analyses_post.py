@@ -1,10 +1,17 @@
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.pool import StaticPool
+from sqlmodel import Session, SQLModel, create_engine, select
+
+from app.db import get_session
+from app.main import app as _app
+from app.models.user import User
 
 ENDPOINT = "/api/v1/analyses"
 TEST_EMAIL = "analyst@test.com"
 TEST_PW = "Password1!"
 TEST_NICK = "분석러"
+EXHAUSTED_EMAIL = "exhausted@test.com"
 
 
 @pytest.fixture
@@ -24,6 +31,47 @@ def logged_in_client(client: TestClient) -> TestClient:
         json={"email": TEST_EMAIL, "password": TEST_PW},
     )
     return client
+
+
+@pytest.fixture
+def daily_exhausted_client() -> TestClient:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+
+    def _override():
+        with Session(engine) as s:
+            yield s
+
+    _app.dependency_overrides[get_session] = _override
+
+    with TestClient(_app, base_url="https://testserver") as c:
+        c.post(
+            "/api/v1/auth/signup",
+            json={
+                "email": EXHAUSTED_EMAIL,
+                "password": TEST_PW,
+                "nickname": "한도초과",
+                "agreed_terms": True,
+                "agreed_privacy": True,
+            },
+        )
+        c.post(
+            "/api/v1/auth/login", json={"email": EXHAUSTED_EMAIL, "password": TEST_PW}
+        )
+
+        with Session(engine) as db:
+            user = db.exec(select(User).where(User.email == EXHAUSTED_EMAIL)).one()
+            user.daily_used = user.daily_limit
+            db.add(user)
+            db.commit()
+
+        yield c
+
+    _app.dependency_overrides.clear()
 
 
 class TestAnalysesPostGate:
@@ -67,5 +115,18 @@ class TestAnalysesPostRawSizeValidation:
         assert resp.json()["error"]["code"] == "INPUT_TOO_LARGE"
 
     def test_passes_when_code_is_within_limit(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 201
+
+
+class TestAnalysesPostDailyLimit:
+    def test_returns_429_when_daily_limit_exhausted(
+        self, daily_exhausted_client: TestClient
+    ):
+        resp = daily_exhausted_client.post(ENDPOINT, json={"code": "print('hi')"})
+        assert resp.status_code == 429
+        assert resp.json()["error"]["code"] == "DAILY_LIMIT_EXCEEDED"
+
+    def test_passes_when_daily_limit_not_exhausted(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": "print('hi')"})
         assert resp.status_code == 201

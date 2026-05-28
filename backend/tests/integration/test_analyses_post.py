@@ -311,6 +311,33 @@ class TestAnalysesPostLineExplanations:
         assert "line_no" in lines[0] and "short" in lines[0]
 
 
+class TestAnalysesPost201Schema:
+    def test_key_concepts_persisted(self, llm_client_db):
+        from app.models.key_concept import KeyConcept
+
+        client, engine = llm_client_db
+        client.post(ENDPOINT, json={"code": LLM_CODE})
+        with Session(engine) as s:
+            rows = s.exec(select(KeyConcept)).all()
+        assert len(rows) == 1
+
+    def test_response_has_id_as_uuid(self, logged_in_client: TestClient):
+        import uuid
+
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        uuid.UUID(resp.json()["id"])
+
+    def test_response_daily_used_is_1(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        assert resp.json()["daily_used"] == 1
+
+    def test_response_has_key_concepts_with_is_new(self, logged_in_client: TestClient):
+        resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})
+        concepts = resp.json().get("key_concepts", [])
+        assert len(concepts) == 1
+        assert concepts[0]["is_new"] is True
+
+
 class TestAnalysesPostLLMBoundary:
     def test_response_has_forest_from_llm(self, logged_in_client: TestClient):
         resp = logged_in_client.post(ENDPOINT, json={"code": LLM_CODE})

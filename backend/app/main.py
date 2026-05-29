@@ -1,6 +1,9 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlmodel import SQLModel
 
 from app.core.exceptions import (
     AnalysisNotFound,
@@ -21,7 +24,16 @@ from app.routers.encyclopedia import router as encyclopedia_router
 from app.routers.search import router as search_router
 from app.routers.users import router as users_router
 
-app = FastAPI(title="Code Decoder API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from app.db import engine
+
+    SQLModel.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(title="Code Decoder API", lifespan=lifespan)
 
 
 @app.exception_handler(LLMFailure)

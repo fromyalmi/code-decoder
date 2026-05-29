@@ -222,6 +222,84 @@ export interface components {
             /** Language */
             language?: "python" | null;
         };
+        /** AnalysisCreateResponse */
+        AnalysisCreateResponse: {
+            /** Id */
+            id: string;
+            /** User Id */
+            user_id: string;
+            /** Code Original */
+            code_original: string;
+            /** Code Processed */
+            code_processed: string;
+            /** Code Sha256 */
+            code_sha256: string;
+            /** Language */
+            language: string;
+            /** Line Count Original */
+            line_count_original: number;
+            /** Line Count Processed */
+            line_count_processed: number;
+            /** Line Mapping */
+            line_mapping: {
+                [key: string]: number;
+            };
+            /** Forest */
+            forest: string;
+            /** Tree */
+            tree: string;
+            /** Line Explanations */
+            line_explanations: components["schemas"]["LineExplanationItem"][];
+            /** Deep Leaves */
+            deep_leaves: components["schemas"]["DeepLeafItem"][];
+            /** Tags */
+            tags: string[];
+            /** Key Concepts */
+            key_concepts: components["schemas"]["KeyConceptCreateItem"][];
+            /** Created At */
+            created_at: string;
+            /** Daily Used */
+            daily_used: number;
+            /** Leaf Counter */
+            leaf_counter: number;
+            /** Is Favorite */
+            is_favorite: boolean;
+            /** Memo */
+            memo: string | null;
+            /** Cache Hit */
+            cache_hit: boolean;
+        };
+        /** AnalysisDetailResponse */
+        AnalysisDetailResponse: {
+            /** Id */
+            id: string;
+            /** User Id */
+            user_id: string;
+            /** Created At */
+            created_at: string;
+            /** Language */
+            language: string;
+            /** Code Original */
+            code_original: string;
+            /** Code Processed */
+            code_processed: string;
+            /** Forest */
+            forest: string;
+            /** Tree */
+            tree: string;
+            /** Tags */
+            tags: string[];
+            /** Memo */
+            memo: string | null;
+            /** Is Favorite */
+            is_favorite: boolean;
+            /** Line Explanations */
+            line_explanations: components["schemas"]["LineExplanationItem"][];
+            /** Deep Leaves */
+            deep_leaves: components["schemas"]["DeepLeafItem"][];
+            /** Key Concepts */
+            key_concepts: components["schemas"]["KeyConceptDetailItem"][];
+        };
         /** AnalysisPatchRequest */
         AnalysisPatchRequest: {
             /** Tags */
@@ -231,10 +309,33 @@ export interface components {
             /** Is Favorite */
             is_favorite?: boolean | null;
         };
+        /** DeepLeafItem */
+        DeepLeafItem: {
+            /** Line No */
+            line_no: number;
+            /** Deep */
+            deep: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** KeyConceptCreateItem */
+        KeyConceptCreateItem: {
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
+            /** Is New */
+            is_new: boolean;
+        };
+        /** KeyConceptDetailItem */
+        KeyConceptDetailItem: {
+            /** Name */
+            name: string;
+            /** Definition */
+            definition: string;
         };
         /** LeafExpandRequest */
         LeafExpandRequest: {
@@ -246,12 +347,67 @@ export interface components {
             /** Deep Text */
             deep_text: string;
         };
+        /** LineExplanationItem */
+        LineExplanationItem: {
+            /** Line No */
+            line_no: number;
+            /** Short */
+            short: string;
+        };
         /** LoginRequest */
         LoginRequest: {
             /** Email */
             email: string;
             /** Password */
             password: string;
+        };
+        /** MeResponse */
+        MeResponse: {
+            /** Id */
+            id: string;
+            /** Email */
+            email: string;
+            /** Nickname */
+            nickname: string;
+            /** Level */
+            level: number;
+            /** Level Auto */
+            level_auto: boolean;
+            /** First Login Completed At */
+            first_login_completed_at: string | null;
+            /** Sound Enabled */
+            sound_enabled: boolean;
+            /** Daily Used */
+            daily_used: number;
+            /** Daily Limit */
+            daily_limit: number;
+            /** Daily Remaining */
+            daily_remaining: number;
+            /** Leaf Counter */
+            leaf_counter: number;
+            reward: components["schemas"]["RewardPublic"];
+            title: components["schemas"]["TitleInfo"];
+        };
+        /** RewardPublic */
+        RewardPublic: {
+            /** Caterpillar Balance */
+            caterpillar_balance: number;
+            /** Caterpillar Total Earned */
+            caterpillar_total_earned: number;
+            /** Caterpillar Total Spent */
+            caterpillar_total_spent: number;
+            /** Shield Count */
+            shield_count: number;
+            /** Shield Used Total */
+            shield_used_total: number;
+            /** Streak Current */
+            streak_current: number;
+            /** Streak Max */
+            streak_max: number;
+            /** Streak Last Date */
+            streak_last_date: string | null;
+            /** Analysis Count Total */
+            analysis_count_total: number;
         };
         /** SignupRequest */
         SignupRequest: {
@@ -265,6 +421,17 @@ export interface components {
             agreed_terms: boolean;
             /** Agreed Privacy */
             agreed_privacy: boolean;
+        };
+        /** TitleInfo */
+        TitleInfo: {
+            /** Stage */
+            stage: number;
+            /** Emoji */
+            emoji: string;
+            /** Label */
+            label: string;
+            /** Next Threshold */
+            next_threshold: number | null;
         };
         /** UserUpdateRequest */
         UserUpdateRequest: {
@@ -411,7 +578,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["MeResponse"];
                 };
             };
             /** @description Validation Error */
@@ -514,7 +681,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AnalysisCreateResponse"];
                 };
             };
             /** @description Validation Error */
@@ -584,7 +751,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AnalysisDetailResponse"];
                 };
             };
             /** @description Validation Error */

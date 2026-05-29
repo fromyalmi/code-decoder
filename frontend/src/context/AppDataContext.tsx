@@ -6,7 +6,11 @@ import {
   type ReactNode,
 } from 'react';
 import { ApiError, registerUnauthorizedHandler } from '../api/client';
-import type { MeResponse, RewardPublic, TitleInfo, UserPublic } from '../api/manual-types';
+import type { components } from '../api/types';
+type MeResponse = components['schemas']['MeResponse'];
+type RewardPublic = components['schemas']['RewardPublic'];
+type TitleInfo = components['schemas']['TitleInfo'];
+type UserPublic = Omit<MeResponse, 'daily_used' | 'daily_limit' | 'daily_remaining' | 'leaf_counter' | 'reward' | 'title'>;
 import { useApi } from '../hooks/useApi';
 
 // ── State ──────────────────────────────────────────────────────────────

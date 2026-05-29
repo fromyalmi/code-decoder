@@ -9,6 +9,8 @@ from app.db import get_session
 from app.models.user import User
 from app.schemas.analysis import (
     AnalysisCreateRequest,
+    AnalysisCreateResponse,
+    AnalysisDetailResponse,
     AnalysisPatchRequest,
     LeafExpandRequest,
     LeafPinRequest,
@@ -18,7 +20,7 @@ from app.services import analysis_service, leaf_service
 router = APIRouter()
 
 
-@router.post("/analyses", status_code=201)
+@router.post("/analyses", status_code=201, response_model=AnalysisCreateResponse)
 def create_analysis(
     req: AnalysisCreateRequest,
     current_user: User = Depends(get_current_user),
@@ -47,7 +49,7 @@ def list_analyses(
     return analysis_service.list_for_user(current_user, db, cursor=cursor)
 
 
-@router.get("/analyses/{analysis_id}")
+@router.get("/analyses/{analysis_id}", response_model=AnalysisDetailResponse)
 def get_analysis(
     analysis_id: uuid.UUID,
     current_user: User = Depends(get_current_user),

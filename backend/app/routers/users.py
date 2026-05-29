@@ -8,7 +8,7 @@ from app.core.title_table import get_title
 from app.db import get_session
 from app.models.user import User
 from app.repositories import reward_repo
-from app.schemas.user import UserUpdateRequest
+from app.schemas.user import MeResponse, UserUpdateRequest
 
 
 router = APIRouter()
@@ -51,7 +51,7 @@ def _user_response(user: User, db: Session) -> dict:
     }
 
 
-@router.get("/me")
+@router.get("/me", response_model=MeResponse)
 def get_me(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_session)
 ):

@@ -29,7 +29,7 @@ def call_analysis(messages: list[dict], max_tokens: int = 8000) -> dict:
             completion = _get_client().beta.chat.completions.parse(
                 model=_MODEL,
                 messages=messages,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_tokens,
                 response_format=LLMAnalysisOutput,
             )
             choice = completion.choices[0]

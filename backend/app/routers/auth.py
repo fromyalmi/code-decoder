@@ -3,7 +3,12 @@ from fastapi.responses import JSONResponse
 from sqlmodel import Session
 
 from app.core.dependencies import get_current_user
-from app.core.security import COOKIE_MAX_AGE, COOKIE_NAME, create_signed_cookie
+from app.core.security import (
+    COOKIE_MAX_AGE,
+    COOKIE_NAME,
+    COOKIE_SECURE,
+    create_signed_cookie,
+)
 from app.db import get_session
 from app.models.user import User
 from app.schemas.auth import LoginRequest, SignupRequest
@@ -67,7 +72,7 @@ def login_handler(
         key=COOKIE_NAME,
         value=create_signed_cookie(str(user.id)),
         httponly=True,
-        secure=True,
+        secure=COOKIE_SECURE,
         samesite="lax",
         max_age=COOKIE_MAX_AGE,
     )

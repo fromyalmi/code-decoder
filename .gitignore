@@ -27,3 +27,6 @@ Thumbs.db
 coverage/
 htmlcov/
 *.log
+
+# Local dev DB
+backend/*.db

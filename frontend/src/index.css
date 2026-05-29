@@ -5,6 +5,17 @@
   --color-green:   #5BA020;
   --color-base:    #1A1A1A;
 
+  /* ── 중립색 9-step (04 §5) ── */
+  --n00: #0E0E0E;
+  --n10: #1A1A1A;
+  --n20: #222222;
+  --n30: #2C2C2C;
+  --n40: #3C3C3C;
+  --n50: #5A5A5A; /* N50은 본문 금지 — 플레이스홀더 전용 (대비 3.0:1) */
+  --n60: #888888;
+  --n70: #B0B0B0;
+  --n80: #E5E5E5;
+
   /* ── 상태 토큰 ── */
   --state-ready:     #888888;
   --state-analyzing: var(--color-yellow);
@@ -22,10 +33,12 @@
   --hover-shift:   translate(3px, -3px);
 
   /* ── 다크 중립색 ── */
-  --surface:       #242424;
-  --border-pixel:  #3C3C3C;
-  --text-primary:  #EAEAEA;
-  --text-muted:    var(--state-ready);
+  --surface:          var(--n20);
+  --border-pixel:     #3C3C3C;
+  --text-primary:     var(--n80);
+  --text-dim:         var(--n60);
+  --text-label:       var(--n70);
+  --text-placeholder: var(--n50);
 
   /* ── 간격 스케일 (4px 그리드) ── */
   --space-1: 4px;

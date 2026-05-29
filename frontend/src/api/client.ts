@@ -18,5 +18,7 @@ export function registerUnauthorizedHandler(fn: () => void): void {
 
 export function handleUnauthorized(): void {
   _onUnauthorized?.();
-  window.location.assign('/login');
+  if (window.location.pathname !== '/login') {
+    window.location.assign('/login');
+  }
 }

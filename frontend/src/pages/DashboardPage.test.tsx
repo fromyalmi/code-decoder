@@ -109,11 +109,13 @@ describe('DashboardPage', () => {
     expect(screen.getByText('코드 묶음에 이름을 붙여 재사용하는 도구')).toBeInTheDocument();
 
     // LeafColumn(3-B-2): 라인 1 (tier='deep_core' — short + deep 모두 표시)
-    expect(screen.getByText('def hi():')).toBeInTheDocument();
+    // CodeBlock(3-B-2.5): code_processed에 'def hi():' 라인 등장 → LeafLine과 합쳐 2회 매치
+    expect(screen.getAllByText('def hi():')).toHaveLength(2);
     expect(screen.getByText('함수 선언')).toBeInTheDocument();
     expect(screen.getByText('def 키워드로 함수 정의...')).toBeInTheDocument();
     // LeafColumn(3-B-2): 라인 2 (tier='short' — short만)
-    expect(screen.getByText('print("hello")')).toBeInTheDocument();
+    // CodeBlock(3-B-2.5): code_processed에 '    print("hello")'(trim 후 'print("hello")') 등장 → 2회 매치
+    expect(screen.getAllByText('print("hello")')).toHaveLength(2);
     expect(screen.getByText('문자열 출력')).toBeInTheDocument();
     // FolderTree(3-B-2): 태그 칩
     expect(screen.getByText('python')).toBeInTheDocument();

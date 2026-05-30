@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isBootstrapping } = useAppData();
 
-  if (isBootstrapping) return <BootSplash />;
+  if (isBootstrapping && !user) return <BootSplash />;
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }

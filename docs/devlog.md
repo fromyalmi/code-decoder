@@ -37,6 +37,7 @@
 - **TDDoc 가정 vs 실제 schema 사전 검증의 가치** — 4건의 차이를 Plan 진입 전 결정해 "TDDoc 시그니처 그대로 구현"의 함정 회피. 특히 TreeCard 폐기 → key_concepts로 정체성 이전이 결정적.
 - **시안 베끼기 가드** — 카드 둥근 모서리/보라 톤은 SSoT 토큰(픽셀 미학·radius 0·--shadow-pixel)이 우선. 시안은 정체성 참고용이지 픽셀 사본 아님.
 - **`cache_hit` JSON 덤프 단언의 한계** — 3-A에 임시로 박은 단언이 3-B-1 RED에 정확히 교체 필요(TODO 주석 효과). 임시 단언엔 항상 교체 시점 주석 필수.
+- **A안 단언 결함(getAllByText 정확매칭 vs 여러 줄 단일노드의 substring 매치)** — 3-B-2.5에서 `getAllByText('def hi():').toHaveLength(2)`로 LeafLine + CodeBlock 동시 검증을 시도했으나, testing-library default exact match는 노드 전체 textContent와 정확 비교라 여러 줄 든 CodeBlock `<code>` 노드의 substring을 매치하지 못함(length 영원히 1). 정규식 `/def hi\(\):/`로 substring 매치하여 정정. Plan 단계에서 이 정책을 정확히 인지하고도 A안으로 결론낸 추론 오류 — **사실 인지와 추론 결과의 정합성**을 항상 점검해야 함. 구현 자체는 RED 시점부터 정상이었고 단언만 결함.
 
 ---
 

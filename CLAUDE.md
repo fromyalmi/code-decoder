@@ -55,3 +55,20 @@
   alembic upgrade head
 
 시점: LLM 연동 완료 후 Railway 첫 배포 직전
+
+## [TODO] ★발표 전 필수★ TS6 ↔ openapi-typescript peer 충돌 — Vercel 배포 가드
+
+현황: typescript@~6.0.2 vs openapi-typescript@7.13.0 (peer typescript@^5.x)
+노출 시점: 2026-05-30 vitest 셋업 install 중 ERESOLVE
+사전 부채: b7d2f06부터 묵인되던 충돌 — 이번이 첫 노출, 임시 --legacy-peer-deps 상환
+
+★발표 전 필수 (배포 데모 블로커 가능)★:
+  Vercel 빌드가 npm install이면 동일 ERESOLVE로 배포 실패 가능.
+  세션 7 배포 전 반드시 둘 중 하나 처리:
+  (a) Vercel install 명령에 --legacy-peer-deps 부착, 또는
+  (b) repo 루트 .npmrc에 legacy-peer-deps=true (.npmrc는 로컬+CI 동시 적용 — 권장)
+
+근본 해결 (발표 후): openapi-typescript가 TS6 지원 메이저 릴리스 시 bump,
+  또는 TS 5 라인으로 회귀. 빌드/타입 생성 자체는 현재 정상(실측 그린).
+
+dev log: 2026-05-30 vitest 셋업 중 사전 부채 발견, --legacy-peer-deps로 임시 상환.

@@ -1,0 +1,6 @@
+.panel {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  line-height: 1.6;
+}

@@ -1,0 +1,56 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.treeText {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.cards {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  padding: var(--space-3);
+  background: var(--n20);
+  border: var(--border-width) solid var(--border-pixel);
+  box-shadow: var(--shadow-pixel);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.cardName {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.newBadge {
+  font-family: var(--font-code);
+  color: var(--color-base);
+  background: var(--color-yellow);
+  padding: 0 var(--space-1);
+  border: var(--border-width) solid var(--border-pixel);
+}
+
+.cardBody {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}

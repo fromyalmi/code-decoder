@@ -45,7 +45,9 @@ const fakeResponse: AnalysisCreateResponse = {
   line_explanations: [{ line_no: 1, short: '문자열 출력' }],
   deep_leaves: [],
   tags: [],
-  key_concepts: [],
+  key_concepts: [
+    { name: '함수', definition: '코드 묶음에 이름을 붙여 재사용하는 도구', is_new: true },
+  ],
   created_at: '2026-05-30T00:00:00Z',
   daily_used: 1,
   leaf_counter: 0,
@@ -93,11 +95,13 @@ describe('DashboardPage', () => {
 
     // 응답 해결 → showing
     resolveFetch(fakeResponse);
-    // TODO(3-B): showing 판정을 JSON 덤프(cache_hit) 의존에서 ResultView 요소로 교체.
-    //            ResultView 도입 시 이 단언이 깨지므로 함께 갱신할 것.
+    // ResultView 도입(3-B-1): forest 텍스트가 ForestPanel에 렌더된 직접 증거
     await waitFor(() => {
-      expect(screen.getByText(/cache_hit/)).toBeInTheDocument();
+      expect(screen.getByText('인사 출력')).toBeInTheDocument();
     });
+    // key_concepts 카드가 TreePanel에 렌더되는지 추가 검증
+    expect(screen.getByText('함수')).toBeInTheDocument();
+    expect(screen.getByText('코드 묶음에 이름을 붙여 재사용하는 도구')).toBeInTheDocument();
 
     // refreshMe 1회
     expect(mockRefreshMe).toHaveBeenCalledTimes(1);

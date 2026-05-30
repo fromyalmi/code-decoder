@@ -5,6 +5,41 @@
 
 ---
 
+## 2026-05-31 세션3 이어서 (3-B-1 / 3-B-2 결과 시각화)
+
+### 산출물
+
+- **3-B-1**: `components/result/` 디렉토리 신설 — ResultView + ForestPanel + TreePanel. DashboardPage showing 분기에서 ResultView 단독 렌더(DashboardLayout 내장). pillar1=forest 텍스트, pillar4=tree 텍스트 + key_concepts 카드.
+- **3-B-2**: LeafColumn + LeafLine + FolderTree 추가. pillar1에 FolderTree(tags 칩) 적층, pillar12에 LeafColumn(라인별 박스: 코드↑ short↓ 조건부 deep). EmptyPlaceholder 제거(사용처 0).
+
+### TDDoc 가정 vs 실제 schema 차이 정책 결정 (4건)
+
+- **`tree: TreeCard[]` 가정 → 실제 string** — 자유 줄글 단일 문단(토큰상한에 잘리기도). 카드 정체성은 `key_concepts[]`로 실현(TreePanel = tree 텍스트 + 카드 그리드). 백엔드 무수정.
+- **`tier` enum 가정 → schema 부재** — 프론트가 `line_explanations` + `deep_leaves`를 `line_no`로 병합해 도출(deep 존재→deep_core, 없으면→short). `deep_pinned`는 3-C로 미룸.
+- **`TagItem` 가정 → 실제 string[]** — FolderTree 단순화(칩 나열만). 트리 구조(├─ fn...)·카테고리·user_edited는 백엔드 schema 보강 시 가능, post-MVP.
+- **`LeafExpansion` 타입 미정의** — leaf expand 콜백·Map<lineNo, LeafExpansion>·LeafExpandModal 모두 3-C로 미룸. 본 세션 LeafLine은 표시 전용.
+
+### 검증 메서드
+
+- **mock 보강** — vi.hoisted + Promise 외부 resolve 패턴(이후 페이지 테스트의 본). globals:false 환경에서 `afterEach(cleanup)` 명시 등록.
+- **가짜 GREEN 점검** — 신규 단언 텍스트가 다른 위치(forest/key_concepts 등)와 겹치는지 표로 확인 후 RED 진입. 3-B-2에서 7개 단언 모두 우연 매치 0 검증.
+- **line_mapping 사전 검증** — 백엔드 code_cleaner + LLM 프롬프트 발췌로 `line_no`가 original 기준임을 확인. `codeOriginal.split('\n')[lineNo-1]`로 충분, line_mapping 미사용 결정. 라인 어긋남 버그 사전 차단.
+
+### 실측 관찰 (post-MVP 후보)
+
+- **tags 칩(1×) ↔ key_concepts 카드(4×) 내용 겹침** — 백엔드 LLM이 유사 항목을 두 자리에 출력하는 데이터 특성. post-MVP: tags 개수/길이 제한 또는 역할 분리 검토.
+- **12× LeafColumn deep 본문 길이로 스크롤 부담** — 라인 많고 deep_core 많을수록 누적. 3-C에서 deep 접힘/펼침 인터랙션으로 해소 예정.
+- **(3-B-1 잔여) 카드 본문 코드조각 미분리** — `key_concepts` schema에 코드 필드 없음. 자연어와 코드(예: `from openai import ...`)가 같은 definition 문자열에 섞여 렌더. post-MVP: schema 보강 + monospace 코드박스 분리.
+- **(3-B-2) FolderTree 트리 구조(├─ fn...) 데이터 부재** — tags가 단순 string[]. 카테고리/관계 보강 시 트리 구조 가능, post-MVP.
+
+### 배운점
+
+- **TDDoc 가정 vs 실제 schema 사전 검증의 가치** — 4건의 차이를 Plan 진입 전 결정해 "TDDoc 시그니처 그대로 구현"의 함정 회피. 특히 TreeCard 폐기 → key_concepts로 정체성 이전이 결정적.
+- **시안 베끼기 가드** — 카드 둥근 모서리/보라 톤은 SSoT 토큰(픽셀 미학·radius 0·--shadow-pixel)이 우선. 시안은 정체성 참고용이지 픽셀 사본 아님.
+- **`cache_hit` JSON 덤프 단언의 한계** — 3-A에 임시로 박은 단언이 3-B-1 RED에 정확히 교체 필요(TODO 주석 효과). 임시 단언엔 항상 교체 시점 주석 필수.
+
+---
+
 ## 2026-05-30 세션3 (3-A DashboardPage)
 
 ### 부채 발견→상환 (4건)

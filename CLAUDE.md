@@ -74,3 +74,4 @@
 dev log:
 - 2026-05-30 vitest 셋업 중 사전 부채 발견, --legacy-peer-deps로 임시 상환.
 - 2026-05-30 잔여 부채: @testing-library/dom peer 누락(legacy-peer-deps 부작용), 보강.
+- 2026-05-30 globals:false 정책 시 testing-library 자동 cleanup 미등록 → afterEach 명시 등록으로 테스트 간 DOM 누적 해소.

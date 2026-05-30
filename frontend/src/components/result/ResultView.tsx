@@ -1,4 +1,5 @@
 import { DashboardLayout } from '../DashboardLayout';
+import { CodeBlock } from './CodeBlock';
 import { FolderTree } from './FolderTree';
 import { ForestPanel } from './ForestPanel';
 import { LeafColumn } from './LeafColumn';
@@ -15,6 +16,7 @@ export interface ResultViewAnalysis {
     is_new?: boolean;
   }>;
   code_original: string;
+  code_processed: string;
   line_explanations: ReadonlyArray<{ line_no: number; short: string }>;
   deep_leaves: ReadonlyArray<{ line_no: number; deep: string }>;
   tags: ReadonlyArray<string>;
@@ -30,6 +32,7 @@ export function ResultView({ analysis }: ResultViewProps) {
       pillar1={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <ForestPanel forest={analysis.forest} />
+          <CodeBlock code={analysis.code_processed} />
           <FolderTree tags={analysis.tags} />
         </div>
       }

@@ -1,0 +1,10 @@
+.block {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--n10);
+  border: var(--border-width) solid var(--border-pixel);
+  font-family: var(--font-code);
+  color: var(--text-primary);
+  white-space: pre;
+  overflow-x: auto;
+}

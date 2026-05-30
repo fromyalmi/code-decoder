@@ -109,13 +109,15 @@ describe('DashboardPage', () => {
     expect(screen.getByText('코드 묶음에 이름을 붙여 재사용하는 도구')).toBeInTheDocument();
 
     // LeafColumn(3-B-2): 라인 1 (tier='deep_core' — short + deep 모두 표시)
-    // CodeBlock(3-B-2.5): code_processed에 'def hi():' 라인 등장 → LeafLine과 합쳐 2회 매치
-    expect(screen.getAllByText('def hi():')).toHaveLength(2);
+    // CodeBlock(3-B-2.5): code_processed에 'def hi():' 라인 등장. CodeBlock의 <code>는
+    // 여러 줄 든 단일 노드라 getAllByText 정확매칭으론 substring 매치 불가 →
+    // 정규식으로 LeafLine(줄 노드) + CodeBlock(전체 노드) 둘 다 매치, length 2.
+    expect(screen.getAllByText(/def hi\(\):/)).toHaveLength(2);
     expect(screen.getByText('함수 선언')).toBeInTheDocument();
     expect(screen.getByText('def 키워드로 함수 정의...')).toBeInTheDocument();
     // LeafColumn(3-B-2): 라인 2 (tier='short' — short만)
-    // CodeBlock(3-B-2.5): code_processed에 '    print("hello")'(trim 후 'print("hello")') 등장 → 2회 매치
-    expect(screen.getAllByText('print("hello")')).toHaveLength(2);
+    // CodeBlock(3-B-2.5): 동일 사유로 정규식 substring 매칭.
+    expect(screen.getAllByText(/print\("hello"\)/)).toHaveLength(2);
     expect(screen.getByText('문자열 출력')).toBeInTheDocument();
     // FolderTree(3-B-2): 태그 칩
     expect(screen.getByText('python')).toBeInTheDocument();

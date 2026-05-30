@@ -1,0 +1,16 @@
+.chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  background: var(--n20);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--border-pixel);
+}

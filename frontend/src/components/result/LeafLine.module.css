@@ -1,0 +1,44 @@
+.line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--border-pixel);
+  background: var(--n20);
+}
+
+.codeRow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.lineNo {
+  font-family: var(--font-code);
+  color: var(--n40);
+  min-width: 2em;
+  text-align: right;
+}
+
+.code {
+  font-family: var(--font-code);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  flex: 1;
+}
+
+.short {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.deep {
+  font-family: var(--font-ui);
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin: 0;
+  padding-left: var(--space-3);
+  border-left: var(--border-width) solid var(--border-pixel);
+}

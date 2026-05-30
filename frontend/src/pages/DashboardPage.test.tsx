@@ -33,18 +33,23 @@ type AnalysisCreateResponse = components['schemas']['AnalysisCreateResponse'];
 const fakeResponse: AnalysisCreateResponse = {
   id: 'a1',
   user_id: 'u1',
-  code_original: 'print("hi")',
-  code_processed: 'print("hi")',
+  code_original: 'def hi():\n    print("hello")',
+  code_processed: 'def hi():\n    print("hello")',
   code_sha256: 'abc',
   language: 'python',
-  line_count_original: 1,
-  line_count_processed: 1,
-  line_mapping: { '1': 1 },
+  line_count_original: 2,
+  line_count_processed: 2,
+  line_mapping: { '1': 1, '2': 2 },
   forest: '인사 출력',
   tree: '단일 호출',
-  line_explanations: [{ line_no: 1, short: '문자열 출력' }],
-  deep_leaves: [],
-  tags: [],
+  line_explanations: [
+    { line_no: 1, short: '함수 선언' },
+    { line_no: 2, short: '문자열 출력' },
+  ],
+  deep_leaves: [
+    { line_no: 1, deep: 'def 키워드로 함수 정의...' },
+  ],
+  tags: ['python', 'function'],
   key_concepts: [
     { name: '함수', definition: '코드 묶음에 이름을 붙여 재사용하는 도구', is_new: true },
   ],
@@ -102,6 +107,17 @@ describe('DashboardPage', () => {
     // key_concepts 카드가 TreePanel에 렌더되는지 추가 검증
     expect(screen.getByText('함수')).toBeInTheDocument();
     expect(screen.getByText('코드 묶음에 이름을 붙여 재사용하는 도구')).toBeInTheDocument();
+
+    // LeafColumn(3-B-2): 라인 1 (tier='deep_core' — short + deep 모두 표시)
+    expect(screen.getByText('def hi():')).toBeInTheDocument();
+    expect(screen.getByText('함수 선언')).toBeInTheDocument();
+    expect(screen.getByText('def 키워드로 함수 정의...')).toBeInTheDocument();
+    // LeafColumn(3-B-2): 라인 2 (tier='short' — short만)
+    expect(screen.getByText('print("hello")')).toBeInTheDocument();
+    expect(screen.getByText('문자열 출력')).toBeInTheDocument();
+    // FolderTree(3-B-2): 태그 칩
+    expect(screen.getByText('python')).toBeInTheDocument();
+    expect(screen.getByText('function')).toBeInTheDocument();
 
     // refreshMe 1회
     expect(mockRefreshMe).toHaveBeenCalledTimes(1);

@@ -71,4 +71,6 @@
 근본 해결 (발표 후): openapi-typescript가 TS6 지원 메이저 릴리스 시 bump,
   또는 TS 5 라인으로 회귀. 빌드/타입 생성 자체는 현재 정상(실측 그린).
 
-dev log: 2026-05-30 vitest 셋업 중 사전 부채 발견, --legacy-peer-deps로 임시 상환.
+dev log:
+- 2026-05-30 vitest 셋업 중 사전 부채 발견, --legacy-peer-deps로 임시 상환.
+- 2026-05-30 잔여 부채: @testing-library/dom peer 누락(legacy-peer-deps 부작용), 보강.

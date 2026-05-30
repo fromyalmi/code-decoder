@@ -1,0 +1,17 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.box {
+  height: 48px;
+  background: var(--n30);
+  border: var(--border-width) solid var(--n40);
+  animation: pulse 480ms var(--motion-steps) infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to   { opacity: 0.8; }
+}

@@ -5,6 +5,36 @@
 
 ---
 
+## 2026-05-31 3-B 완료 회고 (DashboardPage 골격 → ResultView 3기둥 → 출처 무지 실증)
+
+### 산출물 요약
+
+- **3-A** (DashboardPage 골격): 코드 입력 → 분석 → JSON 덤프 표시 (10 mock 단언). ProtectedRoute splash 통합 버그 발견·상환.
+- **3-B-1** (Forest/Tree): ResultView + ForestPanel + TreePanel(tree 텍스트 + key_concepts 카드). pillar1/4 분산.
+- **3-B-2** (Leaf/Folder): LeafColumn(라인별 박스) + LeafLine(tier 도출: short/deep_core) + FolderTree(tags 칩). pillar12 + pillar1 적층.
+- **3-B-2.5** (CodeBlock): pillar1 forest 아래 code_processed monospace 표시. 들여쓰기 보존(white-space:pre).
+- **3-B-3** (Detail 출처 무지 실증): AnalysisDetailPage(GET /analyses/:uuid → ResultView 패스). MemoryRouter 첫 라우팅 테스트 패턴 정립.
+
+### 핵심 성과: ResultView "출처 무지" 실증
+
+`ResultViewAnalysis` 자체 인터페이스(forest/tree/key_concepts/code_original/code_processed/line_explanations/deep_leaves/tags)로 정의 → `AnalysisCreateResponse`(Dashboard) vs `AnalysisDetailResponse`(Detail) 두 다른 응답 타입이 같은 ResultView에 흡수. 케이스 3의 11단언이 양쪽 페이지에서 동일 통과로 **코드 수준 실증** + 실측에서도 양쪽 화면 동일 ResultView 렌더 확인. 3-B-1에서 심은 자체 인터페이스 설계가 3-B-3 단계에서 열매를 맺음.
+
+### 배운점
+
+- **TreeCard 정체성은 tree가 아니라 key_concepts로 실현** — 백엔드 `tree`가 자유 줄글 string(토큰상한에 잘리기도)이라 카드 그리드 불가. TDDoc의 `TreeCard[]` 가정 폐기, `key_concepts[]` 배열로 카드 정체성 이전. 백엔드 무수정, F1 유지, 파싱 0.
+- **MemoryRouter 첫 라우팅 테스트 패턴 정립** — `renderAtRoute(uuid)` 헬퍼(MemoryRouter + Routes + Route)로 useParams 직접 mock 회피, 라우터의 :uuid 추출까지 통합 검증. 이후 페이지 라우팅 테스트의 본.
+- **A안 단언 결함**(getAllByText 정확매칭이 여러 줄 단일노드 substring 못 잡음 → 정규식 substring으로 정정) — Plan 단계에서 정책 정확 인지하고도 잘못된 추론 결론. **사실 인지와 추론 결과의 정합성** 항상 점검.
+
+### post-MVP 후보 (3-C 이후 또는 별도 세션)
+
+- **tree 구조화** — 현재 string 단일 문단. 카드 그리드로 진화 시 schema 보강 필요.
+- **tags ↔ key_concepts 역할 분리** — 현재 백엔드 LLM이 유사 항목을 양쪽에 출력하는 데이터 특성. 길이/개수 제한 또는 역할 분리 검토.
+- **카드 내 코드조각 monospace 분리** — `key_concepts[].definition`에 자연어+코드 섞임(예: `from openai import ...`). schema 보강 후 분리.
+- **12× deep 본문 길이 → 접힘/펼침** — 라인 많고 deep_core 누적 시 스크롤 부담. 3-C 인터랙션으로 해소 예정.
+- **FolderTree 트리 구조(├─ fn...)** — 현재 단순 칩. 카테고리/관계 보강 시 트리 구조 가능.
+
+---
+
 ## 2026-05-31 세션3 이어서 (3-B-1 / 3-B-2 결과 시각화)
 
 ### 산출물

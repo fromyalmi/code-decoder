@@ -18,6 +18,10 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage('NO_SESSION')).toBe('🦜 다시 로그인이 필요해');
   });
 
+  it('NOT_FOUND 코드는 분석 부재 카피를 반환', () => {
+    expect(getErrorMessage('NOT_FOUND')).toBe('🦜 이 분석을 찾을 수 없어 — 삭제됐거나 주소가 잘못됐을 수 있어');
+  });
+
   it('미지정 코드는 UNKNOWN fallback 카피를 반환', () => {
     expect(getErrorMessage('SOMETHING_WEIRD_THAT_DOES_NOT_EXIST')).toBe('🦜 잠시 문제가 생겼어 — 다시 시도해줄래?');
   });
